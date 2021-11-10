@@ -1,0 +1,22 @@
+#!/bin/sh -u
+# https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_06_02
+
+usage() {
+    echo "Usage:" 1>&2
+    echo "    gat [-h] FILE [YYYY [MM [DD]]]" 1>&2
+    exit 1
+}
+
+[ -z "${1+x}" ] && usage
+[ -f "$1" ] || usage
+
+date=$(perl -E '@t=localtime(time);printf("%04s-%02s-%02s", $t[5]+1900,$t[4]+1,$t[3]);')
+if [ -n "${2+x}" ]; then
+    date="$2-$3-$4"
+fi
+
+commitid=$(git log -1 --until="${date}" --format=%H)
+
+git cat-file -p "${commitid}":"$1"
+
+exit 0
